@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Recipe Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+      color: #212529;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1976d2;
+      font-size: 36px;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #adb5bd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 24px;
+      transition: transform 0.3s;
+    }
+
+    .logo:hover {
+      transform: rotate(360deg);
+    }
+
+    .ingredient-input {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .ingredient-input input {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .ingredient-input button {
+      padding: 15px 20px;
+      background: linear-gradient(45deg, #2196f3, #1976d2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .ingredient-input button:hover {
+      background: linear-gradient(45deg, #1976d2, #1565c0);
+    }
+
+    .recipes-container {
+      margin-top: 30px;
+    }
+
+    .recipes-heading {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #1976d2;
+      text-align: center;
+    }
+
+    .recipes {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .recipes li {
+      flex: 1 1 calc(30% - 20px);
+      max-width: calc(30% - 20px);
+      padding: 15px;
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .recipes li:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+    }
+
+    .no-results {
+      text-align: center;
+      color: #868e96;
+      font-style: italic;
+      margin-top: 20px;
+    }
+
+    .steps-container {
+      margin-top: 40px;
+    }
+
+    .steps-heading {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #1976d2;
+      text-align: center;
+    }
+
+    .steps {
+      list-style: decimal;
+      padding-left: 30px;
+    }
+
+    .steps li {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .recipe-image {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      display: block;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 2px solid #90caf9;
+    }
+
+    .video-link {
+      display: block;
+      margin-top: 20px;
+      text-align: center;
+      color: #1976d2;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .video-link:hover {
+      color: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <img src="logo.jpg" alt="Logo" class="logo"> THE RECIPE HUB
+    </h1>
+    
+    <div class="ingredient-input">
+      <input type="text" id="ingredient" placeholder="Enter ingredients separated by commas (e.g., Tomato, Cheese)">
+      <button onclick="addIngredients()">Add</button>
+    </div>
+    <div class="recipes-container" id="recipesContainer">
+      <!-- Recipes heading and list will be dynamically added here -->
+    </div>
+    <div class="steps-container" id="stepsContainer">
+      <!-- Recipe steps and image will be displayed here -->
+    </div>
+  </div>
+  <script>
+    const apiKey = "8a4bec4fc7a14dbe825e46a36cbde8d5"; // Replace with your actual API key
+    const apiUrl = "https://api.spoonacular.com/recipes/findByIngredients";
+
+    let selectedIngredients = [];
+
+    function addIngredients() {
+      const ingredientInput = document.getElementById('ingredient');
+      const inputText = ingredientInput.value.trim();
+
+      if (inputText) {
+        const newIngredients = inputText.split(",").map(ing => ing.trim());
+        newIngredients.forEach(ingredient => {
+          if (ingredient && !selectedIngredients.includes(ingredient)) {
+            selectedIngredients.push(ingredient);
+          }
+        });
+
+        ingredientInput.value = '';
+        suggestRecipes();
+      } else {
+        alert("Please enter valid ingredients!");
+      }
+    }
+
+    async function suggestRecipes() {
+      const recipesContainer = document.getElementById('recipesContainer');
+      const stepsContainer = document.getElementById('stepsContainer');
+      recipesContainer.innerHTML = '';
+      stepsContainer.innerHTML = '';
+
+      if (selectedIngredients.length === 0) {
+        const noResult = document.createElement('div');
+        noResult.className = 'no-results';
+        noResult.textContent = "Please add ingredients to get recipe suggestions.";
+        recipesContainer.appendChild(noResult);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${apiUrl}?ingredients=${selectedIngredients.join(",")}&apiKey=${apiKey}`);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const heading = document.createElement('div');
+          heading.className = 'recipes-heading';
+          heading.textContent = 'Recipes you can try:';
+          recipesContainer.appendChild(heading);
+
+          const recipeList = document.createElement('ul');
+          recipeList.className = 'recipes';
+          data.forEach((recipe, index) => {
+            const li = document.createElement('li');
+            li.textContent = `${index + 1}. ${recipe.title}`;
+            li.onclick = () => fetchRecipeDetails(recipe.id, recipe.image);
+            recipeList.appendChild(li);
+          });
+          recipesContainer.appendChild(recipeList);
+        } else {
+          const noResult = document.createElement('div');
+          noResult.className = 'no-results';
+          noResult.textContent = "No matching recipes found.";
+          recipesContainer.appendChild(noResult);
+        }
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'no-results';
+        errorMessage.textContent = "Error fetching recipes. Please try again later.";
+        recipesContainer.appendChild(errorMessage);
+      }
+    }
+
+    async function fetchRecipeDetails(recipeId, imageUrl) {
+      const stepsContainer = document.getElementById('stepsContainer');
+      stepsContainer.innerHTML = '';
+
+      if (imageUrl) {
+        const recipeImage = document.createElement('img');
+        recipeImage.src = imageUrl;
+        recipeImage.alt = "Recipe Image";
+        recipeImage.className = "recipe-image";
+        stepsContainer.appendChild(recipeImage);
+      }
+
+      try {
+        const instructionsResponse = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/analyzedInstructions?apiKey=${apiKey}`);
+        const instructionsData = await instructionsResponse.json();
+
+        if (instructionsData && instructionsData.length > 0) {
+          const heading = document.createElement('div');
+          heading.className = 'steps-heading';
+          heading.textContent = `How to make the recipe:`;
+          stepsContainer.appendChild(heading);
+
+          const stepList = document.createElement('ol');
+          stepList.className = 'steps';
+          instructionsData[0].steps.forEach((step, index) => {
+            const li = document.createElement('li');
+            li.textContent = step.step;
+            stepList.appendChild(li);
+          });
+          stepsContainer.appendChild(stepList);
+        } else {
+          stepsContainer.innerHTML = 'Steps not found for this recipe.';
+        }
+
+        const videoResponse = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${apiKey}`);
+        const videoData = await videoResponse.json();
+
+        if (videoData && videoData.sourceUrl) {
+          const videoLink = document.createElement('a');
+          videoLink.href = videoData.sourceUrl;
+          videoLink.textContent = "Watch Video Instructions";
+          videoLink.target = "_blank";
+          videoLink.className = "video-link";
+          stepsContainer.appendChild(videoLink);
+        }
+      } catch (error) {
+        console.error("Error fetching recipe details or video link:", error);
+        stepsContainer.innerHTML = 'Error fetching details. Please try again later.';
+      }
+    }
+  </script>
+</body>
+</html>

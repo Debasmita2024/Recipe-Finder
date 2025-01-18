@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Recipe Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+      color: #212529;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      border-radius: 15px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #1976d2;
+      font-size: 36px;
+      letter-spacing: 2px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #adb5bd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 24px;
+      transition: transform 0.3s;
+    }
+
+    .logo:hover {
+      transform: rotate(360deg);
+    }
+
+    .ingredient-input {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .ingredient-input input {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .ingredient-input button {
+      padding: 15px 20px;
+      background: linear-gradient(45deg, #2196f3, #1976d2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .ingredient-input button:hover {
+      background: linear-gradient(45deg, #1976d2, #1565c0);
+    }
+
+    .recipes-container {
+      margin-top: 30px;
+    }
+
+    .recipes-heading {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #1976d2;
+      text-align: center;
+    }
+
+    .recipes {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .recipes li {
+      flex: 1 1 calc(30% - 20px);
+      max-width: calc(30% - 20px);
+      padding: 15px;
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .recipes li:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3);
+    }
+
+    .no-results {
+      text-align: center;
+      color: #868e96;
+      font-style: italic;
+      margin-top: 20px;
+    }
+
+    .steps-container {
+      margin-top: 40px;
+    }
+
+    .steps-heading {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #1976d2;
+      text-align: center;
+    }
+
+    .steps {
+      list-style: decimal;
+      padding-left: 30px;
+    }
+
+    .steps li {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .recipe-image {
+      width: 100%;
+      max-width: 600px;
+      margin: 40px auto;
+      display: block;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 2px solid #90caf9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <img src="logo.jpg" alt="Logo" class="logo"> THE RECIPE HUB
+    </h1>
+    
+    <div class="ingredient-input">
+      <input type="text" id="ingredient" placeholder="Enter ingredients separated by commas (e.g., Tomato, Cheese)">
+      <button onclick="addIngredients()">Add</button>
+    </div>
+    <div class="recipes-container" id="recipesContainer">
+      <!-- Recipes heading and list will be dynamically added here -->
+    </div>
+    <div class="steps-container" id="stepsContainer">
+      <!-- Recipe steps will be displayed here -->
+    </div>
+  </div>
+  <script>
+    // Recipe database with steps and images
+    const recipes = [
+      { 
+        ingredients: ["Tomato", "Cheese"], 
+        suggestions: ["Caprese Salad", "Margherita Pizza"],
+        steps: {
+          "Caprese Salad": [
+            "Slice the tomatoes and cheese.",
+            "Arrange the slices on a plate.",
+            "Drizzle with olive oil and balsamic vinegar.",
+            "Sprinkle with salt, pepper, and fresh basil."
+          ],
+          "Margherita Pizza": [
+            "Preheat the oven to 475°F (245°C).",
+            "Roll out the pizza dough to your desired thickness.",
+            "Spread tomato sauce on the dough.",
+            "Top with mozzarella cheese and fresh basil leaves.",
+            "Bake for 10-12 minutes until crust is golden and cheese is bubbly."
+          ]
+        },
+        images: {
+          "Caprese Salad": "Cap.jpg",
+          "Margherita Pizza": "Pizza.jpg"
+        }
+      },
+      { 
+        ingredients: ["Egg", "Bread", "Milk"], 
+        suggestions: ["French Toast", "Egg Sandwich"],
+        steps: {
+          "French Toast": [
+            "Whisk together eggs, milk, salt, and cinnamon.",
+            "Dip bread slices into the egg mixture, coating both sides.",
+            "Cook the bread on a heated, greased pan until golden brown on both sides.",
+            "Serve with syrup and powdered sugar."
+          ],
+          "Egg Sandwich": [
+            "Toast two slices of bread.",
+            "Fry an egg in a pan.",
+            "Place the fried egg between the toasted bread slices.",
+            "Add salt, pepper, and any desired toppings."
+          ]
+        },
+        images: {
+          "French Toast": "french.jpg",
+          "Egg Sandwich": "egg.jpg"
+        }
+      },
+      { 
+        ingredients: ["Chicken", "Lemon", "Garlic"], 
+        suggestions: ["Lemon Garlic Chicken", "Garlic Chicken Stir Fry"],
+        steps: {
+          "Lemon Garlic Chicken": [
+            "Marinate the chicken in lemon juice, garlic, and olive oil for at least 30 minutes.",
+            "Preheat a grill or pan.",
+            "Cook the chicken until golden brown and cooked through.",
+            "Serve with a side of vegetables or rice."
+          ],
+          "Garlic Chicken Stir Fry": [
+            "Slice chicken into thin strips.",
+            "Stir-fry garlic and chicken in a hot pan with oil.",
+            "Add vegetables like bell peppers, onions, and broccoli.",
+            "Stir-fry until chicken is cooked and vegetables are tender.",
+            "Serve over rice."
+          ]
+        },
+        images: {
+          "Lemon Garlic Chicken": "Lemon.jpg",
+          "Garlic Chicken Stir Fry": "chicken.jpg"
+        }
+      },
+      {
+  ingredients: ["Potato", "Cheese", "Butter"],
+  suggestions: ["Mashed Potatoes", "Cheesy Potato Bake"],
+  steps: {
+    "Mashed Potatoes": [
+      "Peel and boil the potatoes until tender.",
+      "Mash the potatoes with butter, salt, and milk.",
+      "Mix until smooth and creamy.",
+      "Serve hot as a side dish."
+    ],
+    "Cheesy Potato Bake": [
+      "Preheat the oven to 375°F (190°C).",
+      "Slice the potatoes thinly and layer them in a baking dish.",
+      "Sprinkle cheese, butter, and seasoning between layers.",
+      "Bake for 30-40 minutes until golden and bubbly."
+    ]
+  },
+  images: {
+    "Mashed Potatoes": "potato.jpg",
+    "Cheesy Potato Bake": "baked.jpg"
+  }
+},
+{
+  ingredients: ["Pasta", "Tomato", "Basil"],
+  suggestions: ["Spaghetti Marinara", "Tomato Basil Pasta Salad"],
+  steps: {
+    "Spaghetti Marinara": [
+      "Cook the spaghetti according to package instructions.",
+      "In a pan, sauté garlic in olive oil, then add crushed tomatoes.",
+      "Simmer the sauce for 15 minutes and add fresh basil.",
+      "Toss the spaghetti with the sauce and serve hot."
+    ],
+    "Tomato Basil Pasta Salad": [
+      "Cook and cool pasta.",
+      "Dice fresh tomatoes and chop basil leaves.",
+      "Mix the pasta with tomatoes, basil, olive oil, and salt.",
+      "Chill in the refrigerator before serving."
+    ]
+  },
+  images: {
+    "Spaghetti Marinara": "noodles.jpg",
+    "Tomato Basil Pasta Salad": "pasta.jpg"
+  }
+},
+{
+  ingredients: ["Apple", "Cinnamon", "Sugar"],
+  suggestions: ["Baked Apple Dessert", "Apple Cinnamon Smoothie"],
+  steps: {
+    "Baked Apple Dessert": [
+      "Preheat the oven to 350°F (175°C).",
+      "Core the apples and place them in a baking dish.",
+      "Fill the cores with a mixture of sugar, cinnamon, and butter.",
+      "Bake for 25-30 minutes until tender and caramelized."
+    ],
+    "Apple Cinnamon Smoothie": [
+      "Peel and chop the apple.",
+      "Blend the apple with milk, cinnamon, sugar, and ice.",
+      "Pour into a glass and serve chilled."
+    ]
+  },
+  images: {
+    "Baked Apple Dessert": "apple.jpg",
+    "Apple Cinnamon Smoothie": "shake.jpg"
+  }
+},
+{
+  ingredients: ["Brinjal", "Tomato", "Parmesan"],
+  suggestions: ["Brinjal Parmesan", "Ratatouille"],
+  steps: {
+    "Brinjal Parmesan": [
+      "Slice the brinjal and coat with breadcrumbs.",
+      "Fry the slices until golden.",
+      "Layer the fried eggplant with tomato sauce and cheese in a baking dish.",
+      "Bake at 375°F (190°C) for 20-25 minutes."
+    ],
+    "Ratatouille": [
+      "Slice brinjal, tomatoes, zucchini, and bell peppers.",
+      "Arrange the slices in a circular pattern in a baking dish.",
+      "Drizzle with olive oil, sprinkle with herbs, and bake at 375°F (190°C) for 30 minutes."
+    ]
+  },
+  images: {
+    "Brinjal Parmesan": "brinjal.jpg",
+    "Ratatouille": "sabji.jpg"
+  }
+},
+{
+  ingredients: ["Paneer", "Tomato", "Cream"],
+  suggestions: ["Paneer Butter Masala", "Shahi Paneer"],
+  steps: {
+    "Paneer Butter Masala": [
+      "Heat oil in a pan and sauté onions, garlic, and ginger until golden.",
+      "Add tomato puree and cook with spices like garam masala, red chili powder, and coriander powder.",
+      "Add cream and mix well to create a rich gravy.",
+      "Add paneer cubes and simmer for 5 minutes.",
+      "Garnish with fresh coriander and serve with naan or rice."
+    ],
+    "Shahi Paneer": [
+      "Heat ghee in a pan and fry cashews, onions, and ginger until aromatic.",
+      "Blend into a smooth paste and cook with tomato puree and spices.",
+      "Add cream and mix until the gravy thickens.",
+      "Add paneer cubes and simmer for 5 minutes.",
+      "Garnish with kasuri methi and serve hot."
+    ]
+  },
+  images: {
+    "Paneer Butter Masala": "paneer.jpg",
+    "Shahi Paneer": "shahi.jpg"
+  }
+},
+{
+  ingredients: ["Potato", "Green Peas", "Spices"],
+  suggestions: ["Aloo Matar", "Aloo Tikki"],
+  steps: {
+    "Aloo Matar": [
+      "Heat oil in a pan and sauté cumin seeds and onions until golden.",
+      "Add diced potatoes and green peas, followed by turmeric, chili powder, and garam masala.",
+      "Cook with water until the potatoes are tender.",
+      "Garnish with fresh coriander and serve with roti or rice."
+    ],
+    "Aloo Tikki": [
+      "Boil and mash potatoes, mix with green peas, spices, and bread crumbs.",
+      "Shape into patties and shallow fry until golden and crispy.",
+      "Serve hot with mint chutney or tamarind sauce."
+    ]
+  },
+  images: {
+    "Aloo Matar": "matar.jpg",
+    "Aloo Tikki": "tikki.jpg"
+  }
+},
+{
+  ingredients: ["Chicken", "Yogurt", "Spices"],
+  suggestions: ["Chicken Tikka Masala", "Butter Chicken"],
+  steps: {
+    "Chicken Tikka Masala": [
+      "Marinate chicken pieces in yogurt, ginger-garlic paste, and spices for 1 hour.",
+      "Grill or pan-fry the chicken until slightly charred.",
+      "Prepare a tomato-based gravy with cream and spices.",
+      "Add the grilled chicken to the gravy and simmer for 10 minutes.",
+      "Serve with naan or rice."
+    ],
+    "Butter Chicken": [
+      "Marinate chicken in yogurt, lemon juice, and spices for 2 hours.",
+      "Cook the chicken in a pan or tandoor until golden.",
+      "Prepare a rich tomato and cream-based gravy with butter and spices.",
+      "Add the chicken to the gravy and cook for 10 minutes.",
+      "Serve hot with butter naan or jeera rice."
+    ]
+  },
+  images: {
+    "Chicken Tikka Masala": "masala.jpg",
+    "Butter Chicken": "butter.jpg"
+  }
+},
+{
+  ingredients: ["Rice", "Vegetables", "Spices"],
+  suggestions: ["Vegetable Biryani", "Jeera Rice"],
+  steps: {
+    "Vegetable Biryani": [
+      "Sauté whole spices in ghee, then add sliced onions and cook until golden.",
+      "Add mixed vegetables, yogurt, and biryani masala.",
+      "Layer the vegetable mixture with cooked rice and saffron milk in a pot.",
+      "Cook on low heat (dum) for 20 minutes.",
+      "Garnish with fried onions and serve with raita."
+    ],
+    "Jeera Rice": [
+      "Heat ghee in a pan and fry cumin seeds until they splutter.",
+      "Add cooked rice and toss gently to coat with the ghee and cumin.",
+      "Cook for 2-3 minutes and serve as a side dish with curries."
+    ]
+  },
+  images: {
+    "Vegetable Biryani": "veg.jpg",
+    "Jeera Rice": "rice.jpg"
+  }
+},
+{
+  ingredients: ["Chickpeas", "Tomato", "Onion"],
+  suggestions: ["Chole Masala", "Chana Chaat"],
+  steps: {
+    "Chole Masala": [
+      "Soak and boil chickpeas until tender.",
+      "Sauté onions, ginger, and garlic in oil until golden.",
+      "Add tomato puree and spices like chole masala and cook until fragrant.",
+      "Add the boiled chickpeas and simmer for 10 minutes.",
+      "Garnish with coriander and serve with bhatura or rice."
+    ],
+    "Chana Chaat": [
+      "Mix boiled chickpeas with diced onions, tomatoes, and green chilies.",
+      "Add chaat masala, lemon juice, and fresh coriander.",
+      "Toss well and serve as a snack or appetizer."
+    ]
+  },
+  images: {
+    "Chole Masala": "chole.jpg",
+    "Chana Chaat": "chat.jpg"
+  }
+},
+
+      { 
+        ingredients: ["Spinach", "Feta", "Oil"], 
+        suggestions: ["Spinach Salad", "Spinach Feta Omelette"],
+        steps: {
+          "Spinach Salad": [
+            "Wash and dry the spinach.",
+            "Crumble the cheese over the spinach.",
+            "Drizzle with oil and balsamic vinegar.",
+            "Add salt and pepper to taste."
+          ],
+          "Spinach and Feta Omelette": [
+            "Whisk eggs and pour them into a heated pan.",
+            "Add fresh spinach and crumbled feta cheese.",
+            "Cook until the eggs are set and fold the omelette in half.",
+            "Serve hot."
+          ]
+        },
+        images: {
+          "Spinach Salad": "salad.jpg",
+          "Spinach and Feta Omelette": "spinach.jpg"
+        }
+      },
+      { 
+        ingredients: ["Potato", "Oil", "Salt"], 
+        suggestions: ["French Fries"],
+        steps: {
+          "French Fries": [
+            "Peel and cut potatoes into thin strips.",
+            "Heat oil in a deep pan or fryer.",
+            "Fry the potatoes until golden and crispy.",
+            "Drain on paper towels and sprinkle with salt."
+          ]
+        },
+        images: {
+          "French Fries": "fries.jpg"
+        }
+      }
+    ];
+
+    let selectedIngredients = [];
+
+    function addIngredients() {
+      const ingredientInput = document.getElementById('ingredient');
+      const inputText = ingredientInput.value.trim();
+
+      if (inputText) {
+        const newIngredients = inputText.split(",").map(ing => ing.trim());
+        newIngredients.forEach(ingredient => {
+          if (ingredient && !selectedIngredients.includes(ingredient)) {
+            selectedIngredients.push(ingredient);
+          }
+        });
+
+        ingredientInput.value = ''; // Clear input
+        suggestRecipes();
+      } else {
+        alert("Please enter valid ingredients!");
+      }
+    }
+
+    function suggestRecipes() {
+      const recipesContainer = document.getElementById('recipesContainer');
+      const stepsContainer = document.getElementById('stepsContainer');
+      recipesContainer.innerHTML = '';
+      stepsContainer.innerHTML = '';
+
+      let matchedRecipes = [];
+      recipes.forEach(recipe => {
+        if (recipe.ingredients.some(ing => selectedIngredients.includes(ing))) {
+          matchedRecipes = matchedRecipes.concat(recipe.suggestions);
+        }
+      });
+
+      matchedRecipes = [...new Set(matchedRecipes)];
+
+      if (matchedRecipes.length > 0) {
+        const heading = document.createElement('div');
+        heading.className = 'recipes-heading';
+        heading.textContent = 'Recipes you can try:';
+        recipesContainer.appendChild(heading);
+
+        const recipeList = document.createElement('ul');
+        recipeList.className = 'recipes';
+        matchedRecipes.forEach((recipe, index) => {
+          const li = document.createElement('li');
+          li.textContent = `${index + 1}. ${recipe}`;
+          li.onclick = () => showRecipeSteps(recipe);
+          recipeList.appendChild(li);
+        });
+        recipesContainer.appendChild(recipeList);
+      } else {
+        const noResult = document.createElement('div');
+        noResult.className = 'no-results';
+        noResult.textContent = "No matching recipes found.";
+        recipesContainer.appendChild(noResult);
+      }
+    }
+
+    function showRecipeSteps(recipeName) {
+      const stepsContainer = document.getElementById('stepsContainer');
+      const recipe = recipes.find(r => r.suggestions.includes(recipeName));
+
+      if (recipe && recipe.steps && recipe.steps[recipeName]) {
+        stepsContainer.innerHTML = '';
+        
+        const heading = document.createElement('div');
+        heading.className = 'steps-heading';
+        heading.textContent = `How to make ${recipeName}:`;
+        stepsContainer.appendChild(heading);
+
+        const stepList = document.createElement('ol');
+        stepList.className = 'steps';
+
+        recipe.steps[recipeName].forEach((step, index) => {
+          const li = document.createElement('li');
+          li.textContent = step;
+          stepList.appendChild(li);
+        });
+        stepsContainer.appendChild(stepList);
+
+        const recipeImage = document.createElement('img');
+        recipeImage.className = 'recipe-image';
+        recipeImage.src = recipe.images[recipeName];
+        stepsContainer.appendChild(recipeImage);
+      } else {
+        stepsContainer.innerHTML = 'Steps not found for this recipe.';
+      }
+    }
+  </script>
+</body>
+</html>
